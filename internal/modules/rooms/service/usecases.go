@@ -1,19 +1,19 @@
 package application
 
 import (
-	"Echo/internal/modules/rooms/domain"
+	core "Echo/internal/modules/rooms/core"
 )
 
 type RoomService struct {
-	repo domain.RoomRepository
+	repo core.RoomRepository
 }
 
-func NewRoomService(r domain.RoomRepository) *RoomService {
+func NewRoomService(r core.RoomRepository) *RoomService {
 	return &RoomService{repo: r}
 }
 
 func (s *RoomService) CreateRoom(dto RoomCreateRequest) (*RoomResponse, error) {
-	room, err := domain.NewRoom(
+	room, err := core.NewRoom(
 		dto.Number,
 		dto.Name,
 		dto.Description,
@@ -116,7 +116,7 @@ func (s *RoomService) DeleteRoom(id int) error {
 	return s.repo.Delete(id)
 }
 
-func toRoomResponse(r *domain.Room) *RoomResponse {
+func toRoomResponse(r *core.Room) *RoomResponse {
 	return &RoomResponse{
 		ID:          r.ID(),
 		Number:      r.Number(),

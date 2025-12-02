@@ -1,7 +1,7 @@
 package http
 
 import (
-	"Echo/internal/modules/rooms/application"
+	"Echo/internal/modules/rooms/service"
 	"net/http"
 	"strconv"
 

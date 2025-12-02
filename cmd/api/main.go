@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"Echo/config"
-	"Echo/internal/modules/rooms/application"
-	"Echo/internal/modules/rooms/interfaces/http"
+	application "Echo/internal/modules/rooms/service"
+	http "Echo/internal/modules/rooms/web"
 	"Echo/pkg/infrastructure/database"
 	"Echo/pkg/infrastructure/persistence"
 

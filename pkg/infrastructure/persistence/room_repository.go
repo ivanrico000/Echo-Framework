@@ -3,7 +3,7 @@ package persistence
 import (
 	"errors"
 
-	"Echo/internal/modules/rooms/domain"
+	core "Echo/internal/modules/rooms/core"
 
 	"gorm.io/gorm"
 )
@@ -20,8 +20,8 @@ type RoomModel struct {
 	DoubleBeds  int
 }
 
-func (m *RoomModel) ToDomain() *domain.Room {
-	return domain.RebuildRoom(
+func (m *RoomModel) ToDomain() *core.Room {
+	return core.RebuildRoom(
 		m.ID,
 		m.Number,
 		m.Name,
@@ -32,7 +32,7 @@ func (m *RoomModel) ToDomain() *domain.Room {
 }
 
 // Convierte dominio → GORM model
-func FromDomain(r *domain.Room) *RoomModel {
+func FromDomain(r *core.Room) *RoomModel {
 	return &RoomModel{
 		ID:          r.ID(),
 		Number:      r.Number(),
@@ -57,7 +57,7 @@ func NewRoomRepository(db *gorm.DB) *RoomRepository {
 // -------------------------
 // Create
 // -------------------------
-func (r *RoomRepository) Create(room *domain.Room) error {
+func (r *RoomRepository) Create(room *core.Room) error {
 	model := FromDomain(room)
 	return r.db.Create(model).Error
 }
@@ -65,7 +65,7 @@ func (r *RoomRepository) Create(room *domain.Room) error {
 // -------------------------
 // Update
 // -------------------------
-func (r *RoomRepository) Update(room *domain.Room) error {
+func (r *RoomRepository) Update(room *core.Room) error {
 	model := FromDomain(room)
 	return r.db.Save(model).Error
 }
@@ -80,12 +80,12 @@ func (r *RoomRepository) Delete(id int) error {
 // -------------------------
 // GetById
 // -------------------------
-func (r *RoomRepository) GetById(id int) (*domain.Room, error) {
+func (r *RoomRepository) GetById(id int) (*core.Room, error) {
 	var model RoomModel
 
 	err := r.db.First(&model, id).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, domain.ErrInvalidRoomID
+		return nil, core.ErrInvalidRoomID
 	}
 	if err != nil {
 		return nil, err
@@ -97,12 +97,12 @@ func (r *RoomRepository) GetById(id int) (*domain.Room, error) {
 // -------------------------
 // GetByNumber
 // -------------------------
-func (r *RoomRepository) GetByNumber(number int) (*domain.Room, error) {
+func (r *RoomRepository) GetByNumber(number int) (*core.Room, error) {
 	var model RoomModel
 
 	err := r.db.Where("number = ?", number).First(&model).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, domain.ErrInvalidRoomNumber
+		return nil, core.ErrInvalidRoomNumber
 	}
 	if err != nil {
 		return nil, err
@@ -114,14 +114,14 @@ func (r *RoomRepository) GetByNumber(number int) (*domain.Room, error) {
 // -------------------------
 // List
 // -------------------------
-func (r *RoomRepository) List() ([]*domain.Room, error) {
+func (r *RoomRepository) List() ([]*core.Room, error) {
 	var models []RoomModel
 	err := r.db.Find(&models).Error
 	if err != nil {
 		return nil, err
 	}
 
-	rooms := make([]*domain.Room, 0, len(models))
+	rooms := make([]*core.Room, 0, len(models))
 
 	for _, m := range models {
 		room := m.ToDomain()
