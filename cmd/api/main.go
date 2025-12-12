@@ -4,8 +4,14 @@ import (
 	"log"
 
 	"Echo/config"
-	application "Echo/internal/modules/rooms/service"
-	http "Echo/internal/modules/rooms/web"
+
+	roomsservice "Echo/internal/modules/rooms/service"
+	roomsweb "Echo/internal/modules/rooms/web"
+
+	"Echo/internal/modules/users/core"
+	usersservice "Echo/internal/modules/users/service"
+	usersweb "Echo/internal/modules/users/web"
+
 	"Echo/pkg/infrastructure/database"
 	"Echo/pkg/infrastructure/persistence"
 
@@ -28,10 +34,18 @@ func main() {
 		log.Fatal("Failed to migrate database:", err)
 	}
 
+	if err := db.AutoMigrate(&core.User{}); err != nil {
+		log.Fatal("Failed to migrate users:", err)
+	}
+
 	// Inicializar repositorios
 	roomRepo := persistence.NewRoomRepository(db)
-	roomService := application.NewRoomService(roomRepo)
-	roomHandler := http.NewRoomHandler(roomService)
+	roomService := roomsservice.NewRoomService(roomRepo)
+	roomHandler := roomsweb.NewRoomHandler(roomService)
+
+	userRepo := persistence.NewUserRepository(db)
+	userService := usersservice.NewUserUseCases(userRepo)
+	userHandler := usersweb.NewUserHandler(userService)
 
 	// Configurar Echo
 	e := echo.New()
@@ -47,7 +61,8 @@ func main() {
 	}))
 
 	// Setup rutas
-	http.RegisterRoomRoutes(e, roomHandler)
+	roomsweb.RegisterRoomRoutes(e, roomHandler)
+	usersweb.RegisterUserRoutes(e, userHandler)
 
 	// Iniciar servidor
 	log.Printf("🚀 Server starting on port %s", cfg.Server.Port)
